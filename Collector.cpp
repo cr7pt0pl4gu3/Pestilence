@@ -1,6 +1,4 @@
 #include "Collector.h"
-
-#include <iostream>
 #include <Windows.h>
 #include <sstream>
 
@@ -62,7 +60,6 @@ auto Collector::GetWindowsVersion() const->std::wstring
 		std::wstring ret = ss.str();
 
 		// Cleanup
-		std::cout << "Breakpoint!\n";
 		FreeLibrary(hmVersion);
 		::operator delete(buffer);
 
