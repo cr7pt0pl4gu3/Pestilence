@@ -10,9 +10,11 @@ auto Collector::GetWindowsVersion() const->std::wstring
 
 	// Dynamically loading version.dll and resolving its functions
 	LoadLibrary(wsVersion);
+
 	typedef DWORD(WINAPI *GetFileVersionInfoSize_t)(LPCWSTR, LPDWORD);
 	typedef DWORD(WINAPI *GetFileVersionInfo_t)(LPCWSTR, DWORD, DWORD, LPVOID);
 	typedef BOOL(WINAPI *VerQueryValue_t)(LPCVOID, LPCWSTR, LPVOID, PUINT);
+
 	constexpr unsigned char sGetFileVersionInfoSize[] = {
 		'G', 'e', 't', 'F', 'i', 'l', 'e', 'V', 'e', 'r', 's', 'i', 'o', 'n', 'I', 'n', 'f', 'o', 'S', 'i', 'z', 'e',
 		'W', 0x0 };
@@ -24,15 +26,20 @@ auto Collector::GetWindowsVersion() const->std::wstring
 		'V', 'e', 'r', 'Q', 'u', 'e', 'r', 'y', 'V', 'a', 'l', 'u', 'e',
 		'W', 0x0
 	};
+
 	const HMODULE hmVersion = GetModuleHandle(wsVersion);
+
 	if (hmVersion)
 	{
-		const auto GetFileVersionInfoSize_p = reinterpret_cast<GetFileVersionInfoSize_t>(GetProcAddress(
-			hmVersion, reinterpret_cast<LPCSTR>(sGetFileVersionInfoSize)));
-		const auto GetFileVersionInfo_p = reinterpret_cast<GetFileVersionInfo_t>(GetProcAddress(
-			hmVersion, reinterpret_cast<LPCSTR>(sGetFileVersionInfo)));
-		const auto VerQueryValue_p = reinterpret_cast<VerQueryValue_t>(GetProcAddress(
-			hmVersion, reinterpret_cast<LPCSTR>(sVerQueryValue)));
+		const auto GetFileVersionInfoSize_p = 
+			reinterpret_cast<GetFileVersionInfoSize_t>(
+				GetProcAddress(hmVersion, reinterpret_cast<LPCSTR>(sGetFileVersionInfoSize)));
+		const auto GetFileVersionInfo_p = 
+			reinterpret_cast<GetFileVersionInfo_t>(
+				GetProcAddress(hmVersion, reinterpret_cast<LPCSTR>(sGetFileVersionInfo)));
+		const auto VerQueryValue_p = 
+			reinterpret_cast<VerQueryValue_t>(
+				GetProcAddress(hmVersion, reinterpret_cast<LPCSTR>(sVerQueryValue)));
 
 		// Retrieving version-information resource
 		const DWORD buffer_size = GetFileVersionInfoSize_p(static_cast<LPCWSTR>(wsKernel32), nullptr);
@@ -46,8 +53,10 @@ auto Collector::GetWindowsVersion() const->std::wstring
 
 		// Return std::wstring representation of the windows version & build number
 		std::wstringstream ss;
-		ss << HIWORD(version->dwFileVersionMS) << '.' << LOWORD(version->dwFileVersionMS) << '.' <<
-			HIWORD(version->dwFileVersionLS) << '.' << LOWORD(version->dwFileVersionLS);
+		ss << HIWORD(version->dwFileVersionMS)
+		<< '.' << LOWORD(version->dwFileVersionMS)
+		<< '.' << HIWORD(version->dwFileVersionLS)
+		<< '.' << LOWORD(version->dwFileVersionLS);
 		std::wstring ret = ss.str();
 		return ret;
 	}
