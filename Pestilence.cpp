@@ -7,7 +7,11 @@ auto main() -> int
 	try
 	{
 		const auto* collector = new Collector();
-		std::wcout << collector->GetWindowsVersion();
+		const std::vector<std::wstring> info = collector->FingerPrintSystem();
+		for (auto &i : info)
+		{
+			std::wcout << i << '\n';
+		}
 	}
 	catch (...)
 	{

@@ -103,3 +103,44 @@ auto Collector::GetWindowsVersion() const->std::wstring
 		ExitProcess(GetLastError());
 	}
 }
+
+auto Collector::GetNetBIOSName() -> std::wstring
+{
+	// Setting up our buffers
+	WCHAR buffer[MAX_COMPUTERNAME_LENGTH + 1];
+	DWORD len = _countof(buffer);
+
+	// Dynamically resolving GetComputerName()
+	constexpr wchar_t wsKernel32[] = { 'k', 'e', 'r', 'n', 'e', 'l', '3', '2', '.', 'd', 'l', 'l', 0x0 };
+
+	const HMODULE hmKernel32 = GetModuleHandle(wsKernel32);
+
+	typedef BOOL(WINAPI* GetComputerName_t)(LPWSTR, LPDWORD);
+
+	constexpr unsigned char sGetComputerName[] = { 'G', 'e', 't', 'C', 'o', 'm', 'p', 'u', 't', 'e', 'r', 'N', 'a', 'm', 'e', 'W', 0x0 };
+
+	if (hmKernel32)
+	{
+		const auto GetComputerName_p =
+			reinterpret_cast<GetComputerName_t>(
+				GetProcAddress(hmKernel32, reinterpret_cast<LPCSTR>(sGetComputerName)));
+
+		GetComputerName_p(buffer, &len);
+		return std::wstring(buffer);
+	}
+	else
+	{
+		ExitProcess(GetLastError());
+	}
+}
+
+auto Collector::FingerPrintSystem() const -> std::vector<std::wstring>
+{
+	const std::wstring windowsVersion = GetWindowsVersion();
+	const std::wstring netBiosName = GetNetBIOSName();
+
+	std::vector<std::wstring> ret;
+	ret.push_back(windowsVersion);
+	ret.push_back(netBiosName);
+	return ret;
+}
