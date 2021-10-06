@@ -8,8 +8,26 @@ auto Collector::GetWindowsVersion() const->std::wstring
 	constexpr wchar_t wsKernel32[] = { 'k', 'e', 'r', 'n', 'e', 'l', '3', '2', '.', 'd', 'l', 'l', 0x0 };
 	constexpr wchar_t wsVersion[] = { 'v', 'e', 'r', 's', 'i', 'o', 'n', '.', 'd', 'l', 'l', 0x0 };
 
+	// Dynamically resolving LoadLibrary function from kernel32.dll
+	typedef HMODULE(WINAPI* LoadLibrary_t)(LPCWSTR);
+
+	constexpr unsigned char sLoadLibrary[] = { 'L', 'o', 'a', 'd', 'L', 'i', 'b', 'r', 'a', 'r', 'y', 'W', 0x0 };
+
+	const HMODULE hmKernel32 = GetModuleHandle(wsKernel32);
+
+	LoadLibrary_t LoadLibrary_p;
+	if (hmKernel32)
+	{
+		LoadLibrary_p = 
+			reinterpret_cast<LoadLibrary_t>(GetProcAddress(hmKernel32, reinterpret_cast<LPCSTR>(sLoadLibrary)));
+	}
+	else
+	{
+		ExitProcess(GetLastError());
+	}
+
 	// Dynamically loading version.dll and resolving its functions
-	LoadLibrary(wsVersion);
+	LoadLibrary_p(wsVersion);
 
 	typedef DWORD(WINAPI *GetFileVersionInfoSize_t)(LPCWSTR, LPDWORD);
 	typedef DWORD(WINAPI *GetFileVersionInfo_t)(LPCWSTR, DWORD, DWORD, LPVOID);
@@ -59,8 +77,23 @@ auto Collector::GetWindowsVersion() const->std::wstring
 		<< '.' << LOWORD(version->dwFileVersionLS);
 		std::wstring ret = ss.str();
 
-		// Cleanup
-		FreeLibrary(hmVersion);
+		// Cleanup (and dynamic resolution of FreeLibrary)
+		constexpr unsigned char sFreeLibrary[] = { 'F', 'r', 'e', 'e', 'L', 'i', 'b', 'r', 'a', 'r', 'y', 0x0 };
+
+		typedef BOOL(WINAPI* FreeLibrary_t)(HMODULE);
+
+		FreeLibrary_t FreeLibrary_p;
+		if (hmKernel32)
+		{
+			FreeLibrary_p =
+				reinterpret_cast<FreeLibrary_t>(GetProcAddress(hmKernel32, reinterpret_cast<LPCSTR>(sFreeLibrary)));
+		}
+		else
+		{
+			ExitProcess(GetLastError());
+		}
+
+		FreeLibrary_p(hmVersion);
 		::operator delete(buffer);
 
 		return ret;
