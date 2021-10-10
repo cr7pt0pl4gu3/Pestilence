@@ -64,7 +64,7 @@ jobs:
     #    uses a compiled language
 
     - run: |
-       MSBuild.exe Pestilence.sln
+       msbuild Pestilence.sln
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
