@@ -107,22 +107,22 @@ auto Collector::FingerPrintSystem() -> std::vector<std::wstring>
 	switch (si.wProcessorArchitecture)
 	{
 	case PROCESSOR_ARCHITECTURE_AMD64:
-		arch = L"x64 (AMD or Intel)";
+		arch = { 'x', '6', '4', ' ', '(', 'A', 'M', 'D', ' ', 'o', 'r', ' ', 'I', 'n', 't', 'e', 'l', ')', 0x0 };
 		break;
 	case PROCESSOR_ARCHITECTURE_ARM:
-		arch = L"ARM";
+		arch = { 'A', 'R', 'M', 0x0 };
 		break;
 	case PROCESSOR_ARCHITECTURE_ARM64:
-		arch = L"ARM64";
+		arch = { 'A', 'R', 'M', '6', '4', 0x0 };
 		break;
 	case PROCESSOR_ARCHITECTURE_IA64:
-		arch = L"Intel Itanium-based";
+		arch = { 'I', 'n', 't', 'e', 'l', ' ', 'I', 't', 'a', 'n', 'i', 'u', 'm', '-', 'b', 'a', 's', 'e', 'd', 0x0 };
 		break;
 	case PROCESSOR_ARCHITECTURE_INTEL:
-		arch = L"x86";
+		arch = { 'x', '8', '6', 0x0 };
 		break;
 	default:
-		arch = L"Unknown architecture.";
+		arch = { 'U', 'n', 'k', 'n', 'o', 'w', 'n', ' ', 'a', 'r', 'c', 'h', 'i', 't', 'e', 'c', 't', 'u', 'r', 'e', 0x0 };
 		break;
 	}
 
