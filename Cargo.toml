@@ -7,6 +7,7 @@ edition = "2021"
 ntapi = "0.3.6"
 aes = "0.7.5"
 cfb-mode = "0.7.1"
+obfstr = "0.3.0"
 
 [dependencies.windows]
 version = "0.23.0"

