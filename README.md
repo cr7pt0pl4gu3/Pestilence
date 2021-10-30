@@ -46,7 +46,8 @@ Proceed with installation.
 # Usage
 Open powershell and thrive:
 ```shell
-git clone 
+git clone https://github.com/cr7pt0pl4gu3/Pestilence
+cd Pestilence
 cp /path/to/raw/shellcode.bin shellcode.bin
 python encrypt_shellcode.py
 cargo build --release
