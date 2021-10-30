@@ -12,4 +12,7 @@ cfb-mode = "0.7.1"
 version = "0.23.0"
 features = [
     "Win32_System_Memory",
+    "Win32_System_Services",
+    "Win32_System_SystemServices",
+    "Win32_Foundation",
 ]
