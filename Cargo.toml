@@ -1,0 +1,15 @@
+[package]
+name = "pestilence"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ntapi = "0.3.6"
+aes = "0.7.5"
+cfb-mode = "0.7.1"
+
+[dependencies.windows]
+version = "0.23.0"
+features = [
+    "Win32_System_Memory",
+]
