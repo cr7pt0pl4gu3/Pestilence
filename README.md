@@ -3,7 +3,7 @@
 Pestilence is a shellcode loader written in rust. It strives to evade modern EDR solutions.
 ### How does it work?
 It loads AES-128-CFB encrypted shellcode (including the key and IV) into the .text PE section during the build stage.
-During the execution, it first checks for "activated" cmdline argument. If present, it decrypts the shellcode stub and executes it in memory by using NTDLL.DLL functions mixed with sleeps.
+During the execution, it first checks for "activated" cmdline argument. If present, it decrypts the shellcode stub, copies it gradually (mixed with custom sleeps) and proceeds to execute it in memory by using NTDLL.DLL functions (mixed with custom sleeps).
 # Installation
 ### Requirements
 * python3 (tested with 3.10) + pycryptodomex
