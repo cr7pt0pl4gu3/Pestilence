@@ -1,6 +1,6 @@
 # Pestilence
 ### What is pestilence?
-Pestilence is a shellcode loader designed for evasion written in Rust.
+Pestilence is a shellcode loader designed for evasion. Written in Rust.
 ### How does it work?
 It loads AES-128-CFB encrypted shellcode (including the key and IV) into the .text PE section during the build stage.
 During the execution, it first checks for "activated" cmdline argument. If present, it decrypts the shellcode stub, copies it gradually (mixed with custom sleeps) and proceeds to execute it in memory by using NTDLL.DLL functions (mixed with custom sleeps).
