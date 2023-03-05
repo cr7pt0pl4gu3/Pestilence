@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ntapi = "0.3.6"
+ntapi = "0.4.0"
 aes = "0.7.5"
 cfb-mode = "0.7.1"
 obfstr = "0.3.0"
